@@ -212,10 +212,8 @@ jobs:
       
       - name: Run Doxygen
         run: |
-#          echo Downloaded: ${{ fromJson(steps.download-doxygen.outputs.downloaded_files)[0] }}
           cd oolite
-#          ../doxygen/doxygen-*/bin/doxygen
-          doxygen #Flibble
+          doxygen
 
       ## This is for debugging only and helps developing the workflow.
       # - name: Environment Variables 1
