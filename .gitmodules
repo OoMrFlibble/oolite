@@ -4,9 +4,6 @@
 [submodule "Mac-specific"]
 	path = Mac-specific
 	url = ../oolite-mac-components
-[submodule "deps/Linux-deps"]
-	path = deps/Linux-deps
-	url = ../oolite-linux-dependencies.git
 [submodule "tests"]
 	path = tests
 	url = ../oolite-tests.git
@@ -25,3 +22,6 @@
 [submodule "deps/Windows-deps"]
 	path = deps/Windows-deps
 	url = ../oolite-windows-dependencies.git
+[submodule "deps/Linux-deps"]
+	path = deps/Linux-deps
+	url = https://github.com/OoMrFlibble/oolite-linux-dependencies
