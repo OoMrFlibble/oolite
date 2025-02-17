@@ -24,4 +24,4 @@
 	url = ../oolite-windows-dependencies.git
 [submodule "deps/Linux-deps"]
 	path = deps/Linux-deps
-	url = ../OoMrFlibble/oolite-linux-dependencies
+	url = ../oolite-linux-dependencies
