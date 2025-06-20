@@ -219,7 +219,7 @@ jobs:
       - name: Run Doxygen
         run: |
           cd oolite
-          ../doxygen/doxygen-*/bin/doxygen
+          /usr/bin/doxygen
           python3 -m coverxygen --verbose --xml-dir doxygen/xml --src-dir . --output doxygen/coverxygen.info
           mkdir -p doxygen/html/coverage
           genhtml doxygen/coverxygen.info -o doxygen/html/coverage
