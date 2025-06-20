@@ -1954,6 +1954,9 @@ NSComparisonResult marketSorterByMassUnit(id a, id b, void *market);
 	}
 #endif
 
+	// make sure extraGuiScreenKeys is clear
+	DESTROY(extraGuiScreenKeys);
+
 	[[GameController sharedController] logProgress:OOExpandKeyRandomized(@"loading-miscellany")];
 	
 	// if there is cargo remaining from previously (e.g. a game restart), remove it
@@ -13457,9 +13460,10 @@ else _dockTarget = NO_TARGET;
 			{
 				// check whether any of those keycodes is already in use on this screen
 				NSDictionary *keydefs = [def_existing registerKeys];
-				j = [checklist count];
+
 				foreach (key, [keydefs allKeys])
 				{
+					j = [checklist count];
 					while (j--) 
 					{
 						if ([[NSString stringWithFormat:@"%@",[keydefs objectForKey:key]] isEqualToString:[NSString stringWithFormat:@"%@",[checklist objectAtIndex:j]]]) 

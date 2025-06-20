@@ -1,3 +1,4 @@
+---
 name: build-all
 
 on:
@@ -45,7 +46,11 @@ jobs:
 
       - name: generate PDFs
         run: |
-          find oolite/Doc -name "*.odt" -exec soffice --headless --convert-to pdf:"writer_pdf_Export" --outdir oolite/Doc {} \;
+          set
+          set -x
+          export OOLITE_VERSION=$(cat oolite/Doc/OOLITE_VERSION.txt | cut -d= -f2)
+          pip install ooo-dev-tools
+          find oolite/Doc -name "*.odt" -exec sh -c 'python3 oolite/tools/libreoffice.py --load {} --set OOLITE_VERSION=$OOLITE_VERSION --save oolite/Doc/$(basename {} .odt).pdf' \;
           zip oolite-doc.zip oolite/Doc/*.pdf oolite/Doc/OOLITE_VERSION.txt
 
       - name: Archive generated documentation
@@ -94,7 +99,7 @@ jobs:
 
       - name: Extract PDFs
         run: |
-          unzip -u artifacts/oolite-doc.zip
+          unzip -o artifacts/oolite-doc.zip
 
       # This is for debugging only and helps developing the workflow.
       - name: show filesystem before build
@@ -133,7 +138,8 @@ jobs:
       - name: install all the necessary packages
         run: |
           sudo apt update
-          sudo apt -y install graphviz doxygen
+          sudo apt -y install graphviz lcov
+          sudo pip3 install coverxygen
 
       - name: Checkout Oolite
         uses: actions/checkout@v4
@@ -205,21 +211,24 @@ jobs:
 #        run: |
 #          find . -not -path "./oolite/deps/*" -not -path "./oolite/Mac-specific/*" -not -path "./oolite/.git/*"
 
-      #- name: Run doxygen
-      #  uses: mattnotmitt/doxygen-action@v1.9.5
-      #  with:
-      #    working-directory: oolite
-      
+      # - name: Run doxygen
+      #   uses: mattnotmitt/doxygen-action@v1.9.5
+      #   with:
+      #     working-directory: oolite
+
       - name: Run Doxygen
         run: |
           cd oolite
-          doxygen
+          ../doxygen/doxygen-*/bin/doxygen
+          python3 -m coverxygen --verbose --xml-dir doxygen/xml --src-dir . --output doxygen/coverxygen.info
+          mkdir -p doxygen/html/coverage
+          genhtml doxygen/coverxygen.info -o doxygen/html/coverage
 
-      ## This is for debugging only and helps developing the workflow.
-      # - name: Environment Variables 1
-      #  run: |
-      #    printenv | sort
-      #    find . -not -path "./oolite/deps/*" -not -path "./oolite/Mac-specific/*" -not -path "./oolite/.git/*"
+      # This is for debugging only and helps developing the workflow.
+      - name: Environment Variables 1
+        run: |
+          printenv | sort
+          find . -not -path "./oolite/deps/*" -not -path "./oolite/Mac-specific/*" -not -path "./oolite/.git/*"
 
       - name: create tar ball
         run: |
@@ -328,4 +337,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v2
+        uses: actions/deploy-pages@v4
