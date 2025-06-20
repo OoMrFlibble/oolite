@@ -3,11 +3,11 @@ name: build-all
 
 on:
   workflow_dispatch:
-  push:
+#  push:
 
 jobs:
   common-steps:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
     steps:
       - name: install all the necessary packages
         run: |
@@ -68,7 +68,7 @@ jobs:
            npx eslint . || echo Ignore problems and continue
 
   build-linux:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
     needs: [common-steps]
     strategy:
       matrix:
@@ -131,80 +131,8 @@ jobs:
           retention-days: 5
 
 
-  build-windows:
-    runs-on: windows-latest
-    needs: [common-steps]
-    strategy:
-      matrix:
-        flavour: [pkg-win-snapshot, pkg-win-deployment, pkg-win]
-    steps:
-      ## This is for debugging only and helps developing the workflow.
-      # - name: Environment Variables
-      #  run: |
-      #    Get-ChildItem Env: | Sort Name
-
-      - name: Checkout DevelopmentEnvironment
-        uses: actions/checkout@v4
-        with:
-          repository: OoliteProject/oolite-windows-build-env
-          path: DevelopmentEnvironment
-
-      - name: Checkout Oolite
-        uses: actions/checkout@v4
-        with:
-          path: oolite
-          fetch-depth: 0
-          submodules: true
-
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: oolite-doc
-          path: artifacts
-
-      - name: Extract PDFs
-        run: |
-          unzip -o artifacts/oolite-doc.zip
-
-      # check http://aegidian.org/bb/viewtopic.php?p=281821#p281821
-      # this is for debug only; it creates huge logs and takes a long time to execute, yet you never know when you need it
-      - name: check filesystem
-        run: |
-          Get-ChildItem -Path "$env:GITHUB_WORKSPACE" –Recurse
-
-      - name: Prepare compile script with flavour
-        shell: cmd
-        run: |
-          echo Want to build flavour ${{matrix.flavour}}
-          mkdir D:\a\oolite\oolite\DevelopmentEnvironment\gcc\Msys_x2\1.0\etc\profile.d
-          echo export FLAVOUR="${{matrix.flavour}}" > D:\a\oolite\oolite\DevelopmentEnvironment\gcc\Msys_x2\1.0\etc\profile.d\flavour.sh
-          cat D:\a\oolite\oolite\DevelopmentEnvironment\gcc\Msys_x2\1.0\etc\profile.d\flavour.sh
-
-      - name: check filesystem after preparation
-        run: |
-          Get-ChildItem -Path "$env:GITHUB_WORKSPACE" –Recurse
-
-      - name: Compile
-        shell: cmd
-        run: |
-          D:\a\oolite\oolite\DevelopmentEnvironment\gcc\Msys_x2\1.0\msys.cmd
-
-      # check http://aegidian.org/bb/viewtopic.php?p=281821#p281821
-      # this is for debug only; it creates huge logs and takes a long time to execute, yet you never know when you need it
-      - name: check filesystem
-        run: |
-          Get-ChildItem -Path "$env:GITHUB_WORKSPACE" –Recurse
-
-      - name: Archive build
-        uses: actions/upload-artifact@v4
-        with:
-          name: oolite-windows-${{matrix.flavour}}
-          path: |
-            oolite/installers/win32/OoliteInstall*.exe
-          retention-days: 5
-
   build-doxygen:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
     needs: [common-steps]
     steps:
       - name: install all the necessary packages
@@ -237,15 +165,15 @@ jobs:
           echo "OOLITE_VERSION=${OOLITE_VERSION}" >> "$GITHUB_OUTPUT"
           sed -i -e "/PROJECT_NUMBER\s*=/ s/=.*/=${OOLITE_VERSION}/" oolite/Doxyfile
 
-      - name: Download latest Doxygen
-        id: download-doxygen
-        uses: robinraju/release-downloader@v1.8
-        with:
-          repository: "doxygen/doxygen"
+#      - name: Download latest Doxygen
+#        id: download-doxygen
+#        uses: robinraju/release-downloader@v1.8
+#        with:
+#          repository: "doxygen/doxygen"
 
           # A flag to set the download target as latest release
           # The default value is 'false'
-          latest: true
+#          latest: true
 
           # The github tag. e.g: v1.0.1
           # Download assets from a specific tag/version
@@ -258,30 +186,30 @@ jobs:
           # Use this field only to specify filenames other than tarball or
           # zipball, if any.
           # Supports wildcard pattern (eg: '*', '*.deb', '*.zip' etc..)
-          fileName: "doxygen-*.linux.bin.tar.gz"
+#          fileName: "doxygen-*.linux.bin.tar.gz"
 
           # Download the attached tarball (*.tar.gz)
-          tarBall: false
+#          tarBall: false
 
           # Download the attached zipball (*.zip)
-          zipBall: false
+#          zipBall: false
 
           # Relative path under $GITHUB_WORKSPACE to place the downloaded
           # file(s). It will create the target directory automatically if
           # not present eg:
           # out-file-path: "my-downloads"
           #   => It will create directory $GITHUB_WORKSPACE/my-downloads
-          out-file-path: "doxygen"
+#          out-file-path: "doxygen"
 
           # A flag to set if the downloaded assets are archives and should
           # be extracted. Checks all downloaded files if they end with zip,
           # tar or tar.gz and extracts them, if true. Prints a warning if
           # enabled but file is not an archive - but does not fail.
-          extract: true
+#          extract: true
 
-      - name: Check filesytem before Doxygen run
-        run: |
-          find . -not -path "./oolite/deps/*" -not -path "./oolite/Mac-specific/*" -not -path "./oolite/.git/*"
+#      - name: Check filesytem before Doxygen run
+#        run: |
+#          find . -not -path "./oolite/deps/*" -not -path "./oolite/Mac-specific/*" -not -path "./oolite/.git/*"
 
       # - name: Run doxygen
       #   uses: mattnotmitt/doxygen-action@v1.9.5
@@ -290,7 +218,6 @@ jobs:
 
       - name: Run Doxygen
         run: |
-          echo Downloaded: ${{ fromJson(steps.download-doxygen.outputs.downloaded_files)[0] }}
           cd oolite
           ../doxygen/doxygen-*/bin/doxygen
           python3 -m coverxygen --verbose --xml-dir doxygen/xml --src-dir . --output doxygen/coverxygen.info
@@ -326,8 +253,8 @@ jobs:
           path: oolite/doxygen/html
 
   release:
-    needs: [build-linux, build-windows, build-doxygen]
-    runs-on: ubuntu-22.04
+    needs: [build-linux, build-doxygen]
+    runs-on: ubuntu-20.04
     steps:
       ## This is for debugging only and helps developing the workflow.
       # - name: Environment Variables
@@ -380,9 +307,6 @@ jobs:
           title: "Oolite ${{ steps.version.outputs.OOLITE_VERSION }}"
           files: |
             artifacts/oolite-documentation-nightly/oolite-apidoc-*.tgz
-            artifacts/oolite-windows-pkg-win-snapshot/OoliteInstall-*-dev.exe
-            artifacts/oolite-windows-pkg-win-deployment/OoliteInstall-*.exe
-            artifacts/oolite-windows-pkg-win/OoliteInstall-*.exe
             artifacts/pkg-posix-nightly/*.run
             artifacts/pkg-posix/*.run
             artifacts/pkg-posix-test/*.run
@@ -401,7 +325,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     needs: build-doxygen
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
     if: github.ref == 'refs/heads/master'
 
     # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
