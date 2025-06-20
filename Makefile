@@ -175,7 +175,7 @@ endif
 clean:
 	$(MAKE) -f GNUmakefile clean
 	$(RM) -rf oolite.app
-	$(RM) -rf AddOns 
+	$(RM) -rf AddOns
 
 .PHONY: distclean
 distclean: clean
