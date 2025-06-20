@@ -3,7 +3,7 @@ name: build-all
 
 on:
   workflow_dispatch:
-  push:
+  #push:
 
 jobs:
   common-steps:
